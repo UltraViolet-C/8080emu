@@ -4,12 +4,12 @@
 
 // Actual emulator in this file
 
-typedef struct ConditionCodes {
-    uint8_t z:1;
-    uint8_t s:1;
-    uint8_t p:1;
-    uint8_t cy:1;
-    uint8_t ac:1;
+typedef struct ConditionCodes { // flags set by completed instructions
+    uint8_t z:1; // zero - set to 1 when result is 0
+    uint8_t s:1; // sign - set to 1 when bit 7 of the math instruction is set
+    uint8_t p:1; // parity - set when the answer has even parity, clear when odd parity
+    uint8_t cy:1; // carry - set to 1 when instruction resulted in carry out or borrow into high order bit
+    uint8_t ac:1; // auxillary carry - used for binary coded decimal math (not needed yet)
     uint8_t pad:3;
 } ConditionCodes;
 
@@ -40,6 +40,9 @@ int Emulate8080p(State8080 *state) {
 
     switch (*opcode)
     {
+        // TODO: finish all opcodes
+        // start with NOP and MOV
+
         case 0x00: break; // NOP
         case 0x01:        // LXI  B,word
             state->c = opcode[1];
