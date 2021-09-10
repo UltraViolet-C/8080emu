@@ -175,8 +175,44 @@ int Emulate8080p(State8080 *state) {
         case 0x7d: UnimplementedInstruction(state); break;
         case 0x7e: UnimplementedInstruction(state); break;
         case 0x7f: UnimplementedInstruction(state); break;
-        case 0x80: UnimplementedInstruction(state); break;
-        case 0x81: UnimplementedInstruction(state); break;
+        case 0x80: // ADD B
+        {
+            // do the math with higher precision so we can capture the carry out
+            uint16_t answer = (uint16_t) state->a + (uint16_t) state->b;
+
+            // zero flag: if the result is zero, set flag to 0
+            // else, clear it
+            if ((answer & 0xff) == 0) { // checks if every bit is 0
+                state->cc.z = 1;
+            }
+            else {
+                state->cc.z = 0;
+            }
+
+            // carry flag
+            if (answer > 0xff) {
+                state->cc.cy = 1;
+            }
+            else {
+                state->cc.cy = 0;
+            }
+
+            // Parity is handled by a subroutine
+            state->cc.p = Parity(answer & 0xff);
+            state->a = answer & 0xff;
+
+            break;
+        }
+        case 0x81: // ADD C
+        {   // condensed version of ADD code
+            uint16_t answer = (uint16_t) state->a + (uint16_t) state->c;
+            state->cc.z = ((answer & 0xff) == 0);
+            state->cc.s = ((answer & 0x80) != 0);
+            state->cc.cy = (answer > 0xff);
+            state->cc.p = Parity(answer&0xff);
+            state->a = answer & 0xff;
+            break;
+        }
         case 0x82: UnimplementedInstruction(state); break;
         case 0x83: UnimplementedInstruction(state); break;
         case 0x84: UnimplementedInstruction(state); break;
