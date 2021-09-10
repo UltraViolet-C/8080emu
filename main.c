@@ -217,7 +217,17 @@ int Emulate8080p(State8080 *state) {
         case 0x83: UnimplementedInstruction(state); break;
         case 0x84: UnimplementedInstruction(state); break;
         case 0x85: UnimplementedInstruction(state); break;
-        case 0x86: UnimplementedInstruction(state); break;
+        case 0x86: // ADD M
+        {
+            uint16_t offset = (state->h<<8) | (state->l); // combine h and l
+            uint16_t answer = (uint16_t) state->a + state->memory[offset];
+            state->cc.z = ((answer & 0xff) == 0);
+            state->cc.s = ((answer & 0x80) != 0);    
+            state->cc.cy = (answer > 0xff);    
+            state->cc.p = Parity(answer&0xff);    
+            state->a = answer & 0xff;
+            break;
+        }
         case 0x87: UnimplementedInstruction(state); break;
         case 0x88: UnimplementedInstruction(state); break;
         case 0x89: UnimplementedInstruction(state); break;
@@ -281,7 +291,17 @@ int Emulate8080p(State8080 *state) {
         case 0xc3: UnimplementedInstruction(state); break;
         case 0xc4: UnimplementedInstruction(state); break;
         case 0xc5: UnimplementedInstruction(state); break;
-        case 0xc6: UnimplementedInstruction(state); break;
+        case 0xc6: // ADI byte
+        {   
+            // opcode[1] is the byte right after the opcode, aka the immediate value
+            uint16_t answer = (uint16_t) state->a + (uint16_t) opcode[1];
+            state->cc.z = ((answer & 0xff) == 0);
+            state->cc.s = ((answer & 0x80) != 0);
+            state->cc.cy = (answer > 0xff);
+            state->cc.p = Parity(answer & 0xff);
+            state->a = answer & 0xff;
+            break;
+        }
         case 0xc7: UnimplementedInstruction(state); break;
         case 0xc8: UnimplementedInstruction(state); break;
         case 0xc9: UnimplementedInstruction(state); break;
